@@ -8,8 +8,8 @@ const app = new PIXI.Application({
     height: window.innerHeight
 });
 
-const texture = PIXI.Texture.from('sprite2.png');
-const texture2 = PIXI.Texture.from('sprite.png');
+const tileTexture = PIXI.Texture.from('sprite2.png');
+const unitTexture = PIXI.Texture.from('sprite.png');
 
 let sprite1,
     sprite2,
@@ -26,56 +26,72 @@ let container = new PIXI.Container();
 app.stage.addChild(container);
 
 
-let sprites = [];
-
-renderBoard();
+let tileSprites = [];
+let unitSprites = [];
 
 //app.ticker.add(animate);
 
+const ROW_LENGTH = gameboard.length
+const TILE_SCALE = app.renderer.screen.height / ROW_LENGTH;
 
 function renderBoard() {
-    gameboard
-
-    const ROW_LENGTH = gameboard.length
-    const TILE_SCALE = app.renderer.screen.height / ROW_LENGTH;
     for (let y = 0; y < gameboard.length; y++){
-        console.log("curr y", gameboard[y]);
+        // console.log("curr y", gameboard[y]);
         //let rowSize = ROW_LENGTH;
         let offset = 0;
         for (let x = 0; x < gameboard[y].length; x++) {
-            console.log('curr x', gameboard[y][x])
-            let sprite = new PIXI.Sprite(texture);
-            sprite.width= TILE_SCALE;
-            sprite.height= TILE_SCALE;
+            // console.log('curr x', gameboard[y][x])
+            let tileSprite = new PIXI.Sprite(tileTexture);
+            tileSprite.width= TILE_SCALE;
+            tileSprite.height= TILE_SCALE;
             if((y % 2 ==  0)){
                 offset = TILE_SCALE / 2
             }
             //coordinates where current tile will be inserted
-            sprite.x = x * TILE_SCALE + offset;
-            sprite.y = y * TILE_SCALE;
-            if(gameboard[y][x] === 0) sprite.tint = 0x008000;
-            else if (gameboard[y][x] === 1 ) sprite.tint = 0xA52A2A;
+            tileSprite.x = x * TILE_SCALE + offset;
+            tileSprite.y = y * TILE_SCALE;
+            if(gameboard[y][x] === 0) tileSprite.tint = 0x008000;
+            else if (gameboard[y][x] === 1 ) tileSprite.tint = 0xA52A2A;
 
-            sprite.interactive = true;
-            sprite.buttonMode = true;
-            sprite.filters = [outline];
+            tileSprite.interactive = true;
+            tileSprite.buttonMode = true;
+            tileSprite.filters = [outline];
 
-            container.addChild(sprite);
-            sprites.push(sprite);
+            tileSprite.type = 'tile'
+
+            container.addChild(tileSprite);
+            tileSprites.push(tileSprite);
         }
     }
 
 }
 
+const unit = new Unit({x: 1, y: 1})
 
-let delta = 0;
+function renderUnit(unit) {
+    unitSprites.forEach(sprite => container.removeChild(sprite))
+    console.log(unit)
 
-function animate() {
-    delta += 0.1;
+    let offset = 0
 
-    container.y = Math.sin(delta) * 100;
-
-    for (let i = 0; i < sprites.length; i++) {
-        sprites[i].rotation += 0.1;
+    if((unit.coordinates.y % 2 ==  0)){
+        offset = TILE_SCALE / 2
     }
+
+    let unitSprite = new PIXI.Sprite(unitTexture)
+    unitSprite.x = unit.coordinates.x * TILE_SCALE + offset
+    unitSprite.y = unit.coordinates.y * TILE_SCALE
+
+    unitSprite.height = TILE_SCALE
+    unitSprite.width = TILE_SCALE / 2
+
+    unitSprite.type = 'unit'
+
+    container.addChild(unitSprite)
+    unitSprites.push(unitSprite)
+
+    console.log(container)
 }
+
+renderBoard();
+renderUnit(unit);
