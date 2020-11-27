@@ -42,6 +42,7 @@ function renderBoard() {
         for (let x = 0; x < gameboard[y].length; x++) {
             // console.log('curr x', gameboard[y][x])
             let tileSprite = new PIXI.Sprite(tileTexture);
+            tileSprite.data = {coordinates: {x, y}}
             tileSprite.width= TILE_SCALE;
             tileSprite.height= TILE_SCALE;
             if((y % 2 ==  0)){
@@ -53,8 +54,16 @@ function renderBoard() {
             if(gameboard[y][x] === 0) tileSprite.tint = 0x008000;
             else if (gameboard[y][x] === 1 ) tileSprite.tint = 0xA52A2A;
 
+            // tileSprite.buttonMode = true;
             tileSprite.interactive = true;
-            tileSprite.buttonMode = true;
+            tileSprite.on('click', (e) => {
+                if(selectedUnit.coordinates){
+                    console.log('tile clicked, coordinates: ', tileSprite.data.coordinates)
+                    selectedUnit.move(tileSprite.data.coordinates)
+                    selectedUnit = {};
+                }
+            })
+
             tileSprite.filters = [outline];
 
             tileSprite.type = 'tile'
@@ -66,19 +75,35 @@ function renderBoard() {
 
 }
 
+let selectedUnit = {}
+
 const unit = new Unit({x: 1, y: 1})
 
 function renderUnit(unit) {
+    // console.log(unit)
     unitSprites.forEach(sprite => container.removeChild(sprite))
-    console.log(unit)
-
+    
     let offset = 0
-
+    
     if((unit.coordinates.y % 2 ==  0)){
         offset = TILE_SCALE / 2
     }
-
+    
     let unitSprite = new PIXI.Sprite(unitTexture)
+
+    unitSprite.data = unit;
+
+    //setting events
+    unitSprite.interactive = true;
+    unitSprite.buttonMode = true;
+    unitSprite.on('click', (e) => {
+        console.log('Sprite: ', unitSprite)
+        console.log('unit clicked!\n Event: ', e)
+        selectedUnit = unitSprite.data
+    })
+
+
+    // setting position
     unitSprite.x = unit.coordinates.x * TILE_SCALE + offset
     unitSprite.y = unit.coordinates.y * TILE_SCALE
 
@@ -90,7 +115,7 @@ function renderUnit(unit) {
     container.addChild(unitSprite)
     unitSprites.push(unitSprite)
 
-    console.log(container)
+    // console.log(container)
 }
 
 renderBoard();
